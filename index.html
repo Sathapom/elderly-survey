@@ -85,21 +85,20 @@
       <div><label>เบอร์มือถือ <span class="req">*</span></label><input id="contactPhone" type="tel" required inputmode="tel"></div>
       <div><label>อีเมล / LINE ID</label><input id="contactEmail"></div>
     </div>
-    <label>ผู้รับรองข้อมูล <span class="hint">(ผอ.รพ. หรือผู้ได้รับมอบหมาย)</span></label><input id="approver">
   </div>
 
   <div class="card">
     <h2>ส่วนที่ 2 รายผู้ป่วย</h2>
     <div class="chk"><label style="font-weight:600"><input type="checkbox" id="noPatients"> ปัจจุบันไม่มีผู้ป่วยกลุ่มนี้ (รายงาน 0 ราย)</label></div>
     <div id="ptWrap">
-      <p class="hint">กรอก 1 กล่องต่อผู้ป่วย 1 คน · กด “+ เพิ่มผู้ป่วย” เพื่อเพิ่มรายต่อไป · วันนอนเกินและระดับการพึ่งพาคำนวณให้อัตโนมัติ</p>
+      <p class="hint">กรอก 1 กล่องต่อผู้ป่วย 1 คน · กด “+ เพิ่มผู้ป่วย” เพื่อเพิ่มรายต่อไป · จำนวนวันนอนคำนวณให้อัตโนมัติจากวันที่ admit</p>
       <div id="pts"></div>
       <div class="toolbar"><button type="button" class="btn-o" id="addPt">+ เพิ่มผู้ป่วย</button></div>
       <h3 style="font-size:16px;margin:18px 0 8px">สรุปอัตโนมัติ</h3>
       <div class="sum" id="sum"></div>
     </div>
     <div class="grid" style="margin-top:6px">
-      <div><label>ค่าใช้จ่ายหลังพร้อมจำหน่ายโดยประมาณ (บาท) <span class="hint">ถ้ามี</span></label><input id="cost" type="number" min="0" inputmode="numeric"></div>
+      <div><label>ค่าใช้จ่ายรวมของผู้ป่วยกลุ่มนี้โดยประมาณ (บาท) <span class="hint">ถ้ามี</span></label><input id="cost" type="number" min="0" inputmode="numeric"></div>
       <div><label>ผู้สูงอายุกลุ่มนี้ที่ดูแลในรอบ 12 เดือน (คน) <span class="hint">ถ้ามี</span></label><input id="past12" type="number" min="0" inputmode="numeric"></div>
     </div>
   </div>
@@ -130,25 +129,19 @@
     <div class="grid">
       <div><label>เพศ <span class="req">*</span></label><select data-k="sex" required><option value="">—</option><option>ชาย</option><option>หญิง</option></select></div>
       <div><label>อายุ (ปี) <span class="req">*</span></label><input data-k="age" type="number" min="60" max="120" required inputmode="numeric"></div>
-      <div><label>ประเภทเตียง <span class="req">*</span></label><select data-k="bedType" required><option value="">—</option><option>สามัญ</option><option>พิเศษ</option><option>ICU/กึ่งวิกฤต</option></select></div>
-      <div><label>หอผู้ป่วย</label><input data-k="ward"></div>
       <div><label>วันที่ admit <span class="req">*</span></label><input data-k="admitDate" type="date" required></div>
-      <div><label>วันที่แพทย์ลงว่าพร้อมจำหน่าย <span class="hint">เว้นว่างถ้ายังต้องรักษา</span></label><input data-k="readyDate" type="date"></div>
     </div>
-    <p style="margin:6px 0 0">วันนอนเกินจำเป็น: <span class="calc exc">–</span></p>
+    <p style="margin:6px 0 0">นอนรักษามาแล้ว: <span class="calc exc">–</span></p>
     <div class="grid">
       <div><label>สิทธิการรักษา</label><select data-k="right"><option value="">—</option><option>บัตรทอง (UC)</option><option>ข้าราชการ/รัฐวิสาหกิจ</option><option>ประกันสังคม</option><option>บุคคลที่มีปัญหาสถานะและสิทธิ</option><option>ไม่มีสิทธิ/ชำระเอง</option></select></div>
       <div><label>สถานะทางทะเบียน</label><select data-k="idStatus"><option value="">—</option><option>มีเลขบัตรประชาชน</option><option>ไม่ทราบชื่อ/ไม่ทราบตัวตน</option><option>ไม่มีสัญชาติไทย/ไร้สถานะ</option></select></div>
       <div><label>การวินิจฉัยหลัก</label><input data-k="diagnosis" placeholder="เช่น Old CVA"></div>
-      <div><label>ADL (Barthel 0–20)</label><input data-k="adl" type="number" min="0" max="20" inputmode="numeric"></div>
     </div>
-    <p style="margin:6px 0 0">ระดับการพึ่งพา: <span class="calc dep">–</span></p>
     <label>การดูแลพิเศษที่ต้องใช้ <span class="hint">(ตอบได้หลายข้อ)</span></label>
     <div class="chk care"></div>
     <div class="grid">
       <div><label>สถานะญาติ <span class="req">*</span></label><select data-k="family" required><option value="">—</option><option>ไม่มีญาติ</option><option>มีญาติแต่ติดต่อไม่ได้</option><option>ติดต่อได้แต่ปฏิเสธรับกลับ</option><option>ญาติยินดีแต่ไม่มีศักยภาพดูแล</option><option>สงสัยถูกทำร้าย/แสวงหาประโยชน์</option></select></div>
       <div><label>สาเหตุหลักที่จำหน่ายไม่ได้ <span class="req">*</span></label><select data-k="reason" required><option value="">—</option><option>ไม่มีผู้ดูแล</option><option>ไม่มีที่อยู่อาศัย</option><option>สถานสงเคราะห์เต็ม/ไม่รับรายมีอุปกรณ์</option><option>รอพิสูจน์ตัวตน/เอกสารสิทธิ</option><option>ติดขั้นตอนกฎหมาย (ผู้พิทักษ์/ผู้อนุบาล)</option><option>ยังต้องรักษาทางการแพทย์</option><option>อื่น ๆ</option></select></div>
-      <div><label>ประสาน พม./อปท. แล้วหรือยัง</label><select data-k="coordination"><option value="">—</option><option>ยังไม่ได้ประสาน</option><option>แจ้ง พมจ. แล้ว รอผล</option><option>ประสาน อปท./ผู้นำชุมชนแล้ว</option><option>ประสานแล้วแต่ไม่มีที่รองรับ</option></select></div>
       <div><label>สถานที่รองรับที่เหมาะสม <span class="req">*</span></label><select data-k="placement" required><option value="">—</option><option>กลับชุมชนพร้อม Caregiver/LTC</option><option>ศูนย์พัฒนาการจัดสวัสดิการสังคมผู้สูงอายุ (พม.)</option><option>สถานชีวาภิบาล/Intermediate care</option><option>สถานดูแลเอกชน (Nursing home)</option><option>หน่วยดูแลแบบประคับประคอง</option><option>อื่น ๆ</option></select></div>
     </div>
   </div>
@@ -204,35 +197,31 @@ function addPt() {
   node.addEventListener('change', () => calc(node));
   $('pts').appendChild(node); renumber();
 }
-function excessDays(ready) { if (!ready) return null; const d = new Date(ready); d.setHours(0,0,0,0); return Math.max(0, Math.round((today - d) / 864e5)); }
-function depOf(adl) { if (adl === '' || adl == null) return ''; adl = Number(adl); return adl >= 12 ? 'ติดสังคม (ADL 12–20)' : adl >= 5 ? 'ติดบ้าน (ADL 5–11)' : 'ติดเตียง (ADL 0–4)'; }
+const MED = 'ยังต้องรักษาทางการแพทย์';
+function losDays(admit) { if (!admit) return null; const d = new Date(admit); d.setHours(0,0,0,0); return Math.max(0, Math.round((today - d) / 864e5)); }
 function calc(node) {
-  const v = k => node.querySelector(`[data-k="${k}"]`).value;
-  const ex = excessDays(v('readyDate'));
-  node.querySelector('.exc').textContent = ex === null ? 'ยังต้องรักษา' : ex + ' วัน';
-  node.querySelector('.dep').textContent = depOf(v('adl')) || '–';
+  const los = losDays(node.querySelector('[data-k="admitDate"]').value);
+  node.querySelector('.exc').textContent = los === null ? '–' : los.toLocaleString() + ' วัน';
   summary();
 }
 function collectPts() {
   return [...document.querySelectorAll('.pt')].map(node => {
     const o = { patientCode: node.dataset.pcode };
     node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
-    o.excessDays = excessDays(o.readyDate) ?? '';
-    o.dependency = depOf(o.adl);
+    o.losDays = losDays(o.admitDate) ?? '';
     o.specialCare = [...node.querySelectorAll('.care input:checked')].map(x => x.value);
     return o;
   });
 }
 function summary() {
   const p = collectPts();
-  const ready = p.filter(x => x.readyDate);
+  const med = p.filter(x => x.reason === MED).length;
   const items = [
     ['ผู้ป่วยทั้งหมด', p.length + ' คน'],
     ['ชาย / หญิง', p.filter(x => x.sex === 'ชาย').length + ' / ' + p.filter(x => x.sex === 'หญิง').length],
-    ['พร้อมจำหน่ายแล้ว', ready.length + ' คน'],
-    ['ยังต้องรักษา', (p.length - ready.length) + ' คน'],
-    ['เตียง สามัญ/พิเศษ/ICU', ['สามัญ','พิเศษ','ICU/กึ่งวิกฤต'].map(t => p.filter(x => x.bedType === t).length).join(' / ')],
-    ['รวมวันนอนเกินจำเป็น', ready.reduce((s, x) => s + (Number(x.excessDays) || 0), 0).toLocaleString() + ' วัน']
+    ['ติดปัญหาทางสังคม', (p.length - med) + ' คน'],
+    ['ยังต้องรักษาทางการแพทย์', med + ' คน'],
+    ['รวมวันนอน', p.reduce((s, x) => s + (Number(x.losDays) || 0), 0).toLocaleString() + ' วัน']
   ];
   $('sum').innerHTML = items.map(([a, b]) => `<div>${a}<b>${b}</b></div>`).join('');
 }
@@ -260,7 +249,7 @@ $('f').onsubmit = async ev => {
   const v = id => $(id).value.trim();
   const body = {
     code: h.code, bedsActual: v('bedsActual'), occupancy: v('occupancy'), contactName: v('contactName'), contactPosition: v('contactPosition'),
-    contactPhone: v('contactPhone'), contactEmail: v('contactEmail'), approver: v('approver'), noPatients: noP, patients: pts,
+    contactPhone: v('contactPhone'), contactEmail: v('contactEmail'), noPatients: noP, patients: pts,
     cost: v('cost'), past12: v('past12'), problems: [...document.querySelectorAll('#problems input:checked')].map(x => x.value),
     problemOther: v('problemOther'), support1: v('support1'), support2: v('support2'), support3: v('support3'), urgent: v('urgent'), suggestion: v('suggestion')
   };
