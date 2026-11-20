@@ -178,16 +178,16 @@ function table(H, R, P) {
     const r = rmap[h.code], pp = P.filter(p => String(p.HospCode) === h.code);
     return { code: h.code, name: h.name, region: num(h.region), level: h.level, done: !!r, time: r ? r.Timestamp : '',
       pt: pp.length, rd: pp.filter(p => p.MainReason !== 'ยังต้องรักษาทางการแพทย์').length, ex: pp.reduce((s, p) => s + num(p.LOSDays), 0),
-      occ: r ? r.OccupancyPct : '', contact: r ? `${r.ContactName} ${String(r.ContactPhone).replace(/^'/, '')}` : '' };
+      contact: r ? `${r.ContactName} ${String(r.ContactPhone).replace(/^'/, '')}` : '' };
   });
   if (tab === 'done') list = list.filter(x => x.done); if (tab === 'pending') list = list.filter(x => !x.done);
   list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
-  const cols = [['region', 'เขต', 1], ['name', 'โรงพยาบาล'], ['level', 'ระดับ'], ['done', 'สถานะ'], ['pt', 'ผู้ป่วย', 1], ['rd', 'ติดปัญหาสังคม', 1], ['ex', 'วันนอนรวม', 1], ['occ', 'ครองเตียง %', 1], ['contact', 'ผู้ประสานงาน'], ['time', 'เวลาส่ง']];
+  const cols = [['region', 'เขต', 1], ['name', 'โรงพยาบาล'], ['level', 'ระดับ'], ['done', 'สถานะ'], ['pt', 'ผู้ป่วย', 1], ['rd', 'ติดปัญหาสังคม', 1], ['ex', 'วันนอนรวม', 1], ['contact', 'ผู้ประสานงาน'], ['time', 'เวลาส่ง']];
   $('tbl').innerHTML = `<thead><tr>${cols.map(([k, t, r]) => `<th class="${r ? 'r' : ''}" data-k="${k}">${t}${sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead><tbody>` +
     list.map(x => `<tr><td class="r">${x.region}</td><td>${x.name}</td><td class="muted">${String(x.level).split(' ')[0]}</td>
       <td>${x.done ? '<span class="pill ok">ส่งแล้ว</span>' : '<span class="pill no">ยังไม่ส่ง</span>'}</td>
       <td class="r">${x.done ? fmt(x.pt) : '–'}</td><td class="r">${x.done ? fmt(x.rd) : '–'}</td><td class="r">${x.done ? fmt(x.ex) : '–'}</td>
-      <td class="r">${x.occ === '' ? '–' : x.occ}</td><td>${x.contact}</td><td class="muted">${x.time}</td></tr>`).join('') + '</tbody>';
+<td>${x.contact}</td><td class="muted">${x.time}</td></tr>`).join('') + '</tbody>';
   $('tbl').querySelectorAll('th').forEach(th => th.onclick = () => { const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : -1; sortKey = k; render(); });
 }
 
