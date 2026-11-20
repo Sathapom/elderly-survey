@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>แบบสำรวจผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์/รพ.ทั่วไป</title>
+<title>แบบสำรวจผู้ถูกละเลยทอดทิ้งที่นอนรักษาตัวใน รพ.ศูนย์/รพ.ทั่วไป</title>
 <link rel="icon" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -50,7 +50,7 @@
 <body>
 <header><div class="hd">
   <img src="logo.png" alt="ตรากระทรวงสาธารณสุข">
-  <div><h1>แบบสำรวจผู้สูงอายุที่ถูกละเลยทอดทิ้ง<br>ซึ่งกำลังนอนรักษาตัวใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
+  <div><h1>แบบสำรวจผู้ถูกละเลยทอดทิ้ง<br>ซึ่งกำลังนอนรักษาตัวใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
   <p>ข้อมูลด่วน · โปรดส่งภายในวันที่ 20 พฤศจิกายน 2569</p></div>
 </div></header>
 
@@ -61,7 +61,7 @@
   <div class="card">
     <h2>คำชี้แจง</h2>
     <div class="note">
-      นับเฉพาะ <b>ผู้มีอายุ 60 ปีขึ้นไป</b> ที่ <b>กำลังนอนรักษาตัวในวันนี้</b> และถูกละเลยทอดทิ้ง คือ ไม่มีญาติ/ติดต่อญาติไม่ได้, ญาติปฏิเสธรับกลับ, ไม่มีผู้ดูแลหรือที่พักอาศัยหลังจำหน่าย หรือถูกนำมาทิ้งไว้ที่ รพ.<br>
+      นับ <b>ผู้ป่วยทุกช่วงอายุ</b> ที่ <b>กำลังนอนรักษาตัวในวันนี้</b> และอยู่ในกลุ่มเป้าหมาย ได้แก่ <b>ผู้สูงอายุ คนพิการ ผู้ไร้ที่พึ่ง ผู้ป่วยจิตเวช</b> หรือกลุ่มเปราะบางอื่น ๆ<br>และถูกละเลยทอดทิ้ง คือ ไม่มีญาติ/ติดต่อญาติไม่ได้, ญาติปฏิเสธรับกลับ, ไม่มีผู้ดูแลหรือที่พักอาศัยหลังจำหน่าย หรือถูกนำมาทิ้งไว้ที่ รพ.<br>
       <b>ไม่นับ</b> รายที่ญาติมีแผนรับกลับชัดเจนภายใน 72 ชั่วโมง<br>
       <b>ไม่ต้องกรอกชื่อ HN หรือเลขบัตรประชาชน</b> ระบบจะตั้งรหัสผู้ป่วยให้เอง · <b>1 โรงพยาบาลส่งได้ 1 ครั้ง</b>
     </div>
@@ -98,7 +98,7 @@
     </div>
     <div class="grid" style="margin-top:6px">
       <div><label>ค่าใช้จ่ายรวมของผู้ป่วยกลุ่มนี้โดยประมาณ (บาท) <span class="hint">ถ้ามี</span></label><input id="cost" type="number" min="0" inputmode="numeric"></div>
-      <div><label>ผู้สูงอายุกลุ่มนี้ที่ดูแลในรอบ 12 เดือน (คน) <span class="hint">ถ้ามี</span></label><input id="past12" type="number" min="0" inputmode="numeric"></div>
+      <div><label>ผู้ป่วยกลุ่มนี้ที่ดูแลในรอบ 12 เดือน (คน) <span class="hint">ถ้ามี</span></label><input id="past12" type="number" min="0" inputmode="numeric"></div>
     </div>
   </div>
 
@@ -127,9 +127,12 @@
     <div class="pt-h"><b class="pcode"></b><button type="button" class="btn-x del">ลบ ✕</button></div>
     <div class="grid">
       <div><label>เพศ <span class="req">*</span></label><select data-k="sex" required><option value="">—</option><option>ชาย</option><option>หญิง</option></select></div>
-      <div><label>อายุ (ปี) <span class="req">*</span></label><input data-k="age" type="number" min="60" max="120" required inputmode="numeric"></div>
+      <div><label>อายุ (ปี) <span class="req">*</span></label><input data-k="age" type="number" min="0" max="120" required inputmode="numeric"></div>
       <div><label>วันที่ admit <span class="req">*</span></label><input data-k="admitDate" type="date" required></div>
     </div>
+    <label>กลุ่มเป้าหมาย <span class="req">*</span> <span class="hint">(ตอบได้หลายข้อ · อายุ 60 ปีขึ้นไปจะติ๊กผู้สูงอายุให้อัตโนมัติ)</span></label>
+    <div class="chk grp"></div>
+    <input data-k="groupOther" class="grpOther hidden" placeholder="กลุ่มอื่น ๆ ระบุ" style="margin-top:6px">
     <p style="margin:6px 0 0">นอนรักษามาแล้ว: <span class="calc exc">–</span></p>
     <div class="grid">
       <div><label>สิทธิการรักษา</label><select data-k="right"><option value="">—</option><option>บัตรทอง (UC)</option><option>ข้าราชการ/รัฐวิสาหกิจ</option><option>ประกันสังคม</option><option>บุคคลที่มีปัญหาสถานะและสิทธิ</option><option>ไม่มีสิทธิ/ชำระเอง</option></select></div>
@@ -141,7 +144,7 @@
     <div class="grid">
       <div><label>สถานะญาติ <span class="req">*</span></label><select data-k="family" required><option value="">—</option><option>ไม่มีญาติ</option><option>มีญาติแต่ติดต่อไม่ได้</option><option>ติดต่อได้แต่ปฏิเสธรับกลับ</option><option>ญาติยินดีแต่ไม่มีศักยภาพดูแล</option><option>สงสัยถูกทำร้าย/แสวงหาประโยชน์</option></select></div>
       <div><label>สาเหตุหลักที่จำหน่ายไม่ได้ <span class="req">*</span></label><select data-k="reason" required><option value="">—</option><option>ไม่มีผู้ดูแล</option><option>ไม่มีที่อยู่อาศัย</option><option>สถานสงเคราะห์เต็ม/ไม่รับรายมีอุปกรณ์</option><option>รอพิสูจน์ตัวตน/เอกสารสิทธิ</option><option>ติดขั้นตอนกฎหมาย (ผู้พิทักษ์/ผู้อนุบาล)</option><option>ยังต้องรักษาทางการแพทย์</option><option>อื่น ๆ</option></select></div>
-      <div><label>สถานที่รองรับที่เหมาะสม <span class="req">*</span></label><select data-k="placement" required><option value="">—</option><option>กลับชุมชนพร้อม Caregiver/LTC</option><option>ศูนย์พัฒนาการจัดสวัสดิการสังคมผู้สูงอายุ (พม.)</option><option>สถานชีวาภิบาล/Intermediate care</option><option>สถานดูแลเอกชน (Nursing home)</option><option>หน่วยดูแลแบบประคับประคอง</option><option>อื่น ๆ</option></select></div>
+      <div><label>สถานที่รองรับที่เหมาะสม <span class="req">*</span></label><select data-k="placement" required><option value="">—</option><option>กลับชุมชนพร้อม Caregiver/LTC</option><option>ศูนย์พัฒนาการจัดสวัสดิการสังคมผู้สูงอายุ (พม.)</option><option>สถานคุ้มครองและพัฒนาคนพิการ (พม.)</option><option>ศูนย์คุ้มครองคนไร้ที่พึ่ง (พม.)</option><option>รพ./สถาบันจิตเวช หรือสถานฟื้นฟูผู้ป่วยจิตเวช</option><option>สถานชีวาภิบาล/Intermediate care</option><option>สถานดูแลเอกชน (Nursing home)</option><option>หน่วยดูแลแบบประคับประคอง</option><option>อื่น ๆ</option></select></div>
     </div>
   </div>
 </template>
@@ -150,6 +153,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const CARE = ['ใส่สายให้อาหาร','แผลกดทับ','เจาะคอ/ใช้ออกซิเจน','สายสวนปัสสาวะ','ฟอกไต/ยาฉีดต่อเนื่อง','สมองเสื่อม/พฤติกรรมต้องเฝ้าระวัง','จิตเวช','ระยะท้าย/ประคับประคอง'];
+const GROUPS = ['ผู้สูงอายุ (60 ปีขึ้นไป)','คนพิการ','ผู้ไร้ที่พึ่ง/คนไร้บ้าน','ผู้ป่วยจิตเวช','อื่น ๆ'];
 const PROBLEMS = ['สถานรองรับของ พม. ไม่เพียงพอ/เต็ม','สถานรองรับไม่รับผู้ป่วยติดเตียงหรือมีอุปกรณ์การแพทย์','พิสูจน์ตัวตน/สิทธิใช้เวลานาน','ไม่มีผู้มีอำนาจตัดสินใจแทนผู้ป่วย','ไม่มีงบประมาณค่าดูแลหลังจำหน่าย','ชุมชน/อปท. ไม่มีระบบ LTC รองรับ','ไม่มีจุดรับเรื่องที่ชัดเจนระหว่าง สธ.–พม.–ท้องถิ่น'];
 let HOSP = [], seq = 0;
 const today = new Date(); today.setHours(0,0,0,0);
@@ -190,6 +194,10 @@ function renumber() {
 function addPt() {
   const node = $('ptTpl').content.firstElementChild.cloneNode(true);
   const id = ++seq;
+  node.querySelector('.grp').innerHTML = GROUPS.map(c => `<label><input type="checkbox" value="${c}"> ${c}</label>`).join('');
+  const ageEl = node.querySelector('[data-k="age"]'), eld = node.querySelector('.grp input');
+  ageEl.addEventListener('input', () => { if (ageEl.value !== '') eld.checked = Number(ageEl.value) >= 60; });
+  node.querySelector('.grp input[value="อื่น ๆ"]').addEventListener('change', e => node.querySelector('.grpOther').classList.toggle('hidden', !e.target.checked));
   node.querySelector('.care').innerHTML = CARE.map(c => `<label><input type="checkbox" value="${c}"> ${c}</label>`).join('');
   node.querySelector('.del').onclick = () => { if (confirm('ลบผู้ป่วยรายนี้?')) { node.remove(); renumber(); } };
   node.addEventListener('input', () => calc(node));
@@ -208,6 +216,7 @@ function collectPts() {
     const o = { patientCode: node.dataset.pcode };
     node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
     o.losDays = losDays(o.admitDate) ?? '';
+    o.targetGroup = [...node.querySelectorAll('.grp input:checked')].map(x => x.value === 'อื่น ๆ' && o.groupOther ? 'อื่น ๆ: ' + o.groupOther : x.value);
     o.specialCare = [...node.querySelectorAll('.care input:checked')].map(x => x.value);
     return o;
   });
@@ -235,6 +244,7 @@ $('f').onsubmit = async ev => {
   const noP = $('noPatients').checked;
   const nodes = [...document.querySelectorAll('.pt')];
   if (!noP && !nodes.length) errs.push('pts');
+  if (!noP) nodes.forEach(n => { const g = n.querySelector('.grp'); const bad = !g.querySelector('input:checked'); g.style.outline = bad ? '2px solid var(--red)' : ''; if (bad) errs.push(g); });
   if (!noP) nodes.forEach(n => n.querySelectorAll('[required]').forEach(el => { const bad = !el.value || (el.type === 'number' && !el.checkValidity()); el.style.borderColor = bad ? 'var(--red)' : ''; if (bad) errs.push(el); }));
   if (errs.length) {
     $('formErr').textContent = errs.includes('pts') ? 'โปรดเพิ่มผู้ป่วยอย่างน้อย 1 ราย หรือติ๊ก “ไม่มีผู้ป่วยกลุ่มนี้”' : 'โปรดกรอกช่องที่มี * ให้ครบ (ช่องที่ยังไม่ครบมีกรอบสีแดง)';
