@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แบบสำรวจผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์/รพ.ทั่วไป</title>
+<link rel="icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --g:#006838; --g2:#e8f3ec; --line:#d5ddd8; --ink:#1d2a22; --mute:#5d6b62; --red:#b42318; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Sarabun',system-ui,sans-serif; font-size:17px; color:var(--ink); background:#f4f7f5; line-height:1.55; }
+  header { background:var(--g); color:#fff; padding:18px 16px; }
+  .hd { max-width:880px; margin:auto; display:flex; gap:14px; align-items:center; }
+  .hd img { width:64px; height:64px; background:#fff; border-radius:50%; padding:2px; flex:none; }
+  .hd h1 { font-size:21px; margin:0; line-height:1.3; }
+  .hd p { margin:2px 0 0; opacity:.9; font-size:15px; }
+  main { max-width:880px; margin:auto; padding:16px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:16px; }
+  .card h2 { font-size:19px; margin:0 0 12px; color:var(--g); }
+  .note { background:var(--g2); border-radius:8px; padding:10px 12px; font-size:15px; color:#234; }
+  label { display:block; font-weight:600; margin:10px 0 4px; font-size:15.5px; }
+  label .req { color:var(--red); }
+  .hint { font-weight:400; color:var(--mute); font-size:14px; }
+  input, select, textarea { width:100%; font:inherit; font-size:16px; padding:9px 10px; border:1px solid #b9c5be; border-radius:8px; background:#fff; }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--g); border-color:var(--g); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0 14px; }
+  .chk { display:flex; flex-wrap:wrap; gap:6px 14px; }
+  .chk label { font-weight:400; display:flex; gap:6px; align-items:center; margin:2px 0; }
+  .chk input { width:auto; }
+  .pt { border:1px solid var(--line); border-left:5px solid var(--g); border-radius:10px; padding:12px 14px; margin:12px 0; background:#fbfdfc; }
+  .pt-h { display:flex; justify-content:space-between; align-items:center; }
+  .pt-h b { color:var(--g); font-size:17px; }
+  .calc { color:var(--g); font-weight:700; }
+  button { font:inherit; border:0; border-radius:8px; padding:10px 16px; cursor:pointer; }
+  .btn { background:var(--g); color:#fff; font-weight:600; }
+  .btn-o { background:#fff; color:var(--g); border:1.5px solid var(--g); font-weight:600; }
+  .btn-x { background:none; color:var(--red); padding:4px 8px; }
+  .big { width:100%; padding:14px; font-size:19px; }
+  .sum { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
+  .sum div { background:var(--g2); border-radius:8px; padding:8px 10px; font-size:14px; }
+  .sum b { display:block; font-size:22px; color:var(--g); }
+  .err { color:var(--red); font-size:14px; margin-top:4px; }
+  #msg { text-align:center; padding:40px 16px; }
+  .hidden { display:none !important; }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; }
+  footer { text-align:center; color:var(--mute); font-size:13px; padding:10px 0 30px; }
+</style>
+</head>
+<body>
+<header><div class="hd">
+  <img src="logo.png" alt="ตรากระทรวงสาธารณสุข">
+  <div><h1>แบบสำรวจผู้สูงอายุที่ถูกละเลยทอดทิ้ง<br>ซึ่งกำลังนอนรักษาตัวใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
+  <p>ข้อมูลด่วน · โปรดส่งภายในวันที่ 20 พฤศจิกายน 2569</p></div>
+</div></header>
+
+<main>
+<div id="loading" class="card">กำลังโหลดรายชื่อโรงพยาบาล…</div>
+
+<form id="f" class="hidden" novalidate>
+  <div class="card">
+    <h2>คำชี้แจง</h2>
+    <div class="note">
+      นับเฉพาะ <b>ผู้มีอายุ 60 ปีขึ้นไป</b> ที่ <b>กำลังนอนรักษาตัวในวันนี้</b> และถูกละเลยทอดทิ้ง คือ ไม่มีญาติ/ติดต่อญาติไม่ได้, ญาติปฏิเสธรับกลับ, ไม่มีผู้ดูแลหรือที่พักอาศัยหลังจำหน่าย หรือถูกนำมาทิ้งไว้ที่ รพ.<br>
+      <b>ไม่นับ</b> รายที่ญาติมีแผนรับกลับชัดเจนภายใน 72 ชั่วโมง<br>
+      <b>ไม่ต้องกรอกชื่อ HN หรือเลขบัตรประชาชน</b> ระบบจะตั้งรหัสผู้ป่วยให้เอง · <b>1 โรงพยาบาลส่งได้ 1 ครั้ง</b>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>ส่วนที่ 1 ข้อมูลโรงพยาบาล</h2>
+    <div class="grid">
+      <div><label>เขตสุขภาพ <span class="req">*</span></label>
+        <select id="region"><option value="">— ทุกเขต —</option></select></div>
+      <div style="grid-column:span 2"><label>โรงพยาบาล <span class="req">*</span> <span class="hint">(รพ.ที่ส่งแล้วจะไม่แสดง)</span></label>
+        <select id="hosp" required><option value="">— เลือกโรงพยาบาล —</option></select></div>
+    </div>
+    <div class="grid">
+      <div><label>เตียงที่ใช้จริง (เตียง)</label><input id="bedsActual" type="number" min="0" inputmode="numeric"></div>
+      <div><label>อัตราครองเตียงเดือนล่าสุด (%)</label><input id="occupancy" type="number" min="0" max="300" step="0.1" inputmode="decimal"></div>
+    </div>
+    <div class="grid">
+      <div><label>ชื่อ-สกุลผู้ประสานงาน <span class="req">*</span></label><input id="contactName" required></div>
+      <div><label>ตำแหน่ง</label><input id="contactPosition" placeholder="เช่น นักสังคมสงเคราะห์"></div>
+      <div><label>เบอร์มือถือ <span class="req">*</span></label><input id="contactPhone" type="tel" required inputmode="tel"></div>
+      <div><label>อีเมล / LINE ID</label><input id="contactEmail"></div>
+    </div>
+    <label>ผู้รับรองข้อมูล <span class="hint">(ผอ.รพ. หรือผู้ได้รับมอบหมาย)</span></label><input id="approver">
+  </div>
+
+  <div class="card">
+    <h2>ส่วนที่ 2 รายผู้ป่วย</h2>
+    <div class="chk"><label style="font-weight:600"><input type="checkbox" id="noPatients"> ปัจจุบันไม่มีผู้ป่วยกลุ่มนี้ (รายงาน 0 ราย)</label></div>
+    <div id="ptWrap">
+      <p class="hint">กรอก 1 กล่องต่อผู้ป่วย 1 คน · กด “+ เพิ่มผู้ป่วย” เพื่อเพิ่มรายต่อไป · วันนอนเกินและระดับการพึ่งพาคำนวณให้อัตโนมัติ</p>
+      <div id="pts"></div>
+      <div class="toolbar"><button type="button" class="btn-o" id="addPt">+ เพิ่มผู้ป่วย</button></div>
+      <h3 style="font-size:16px;margin:18px 0 8px">สรุปอัตโนมัติ</h3>
+      <div class="sum" id="sum"></div>
+    </div>
+    <div class="grid" style="margin-top:6px">
+      <div><label>ค่าใช้จ่ายหลังพร้อมจำหน่ายโดยประมาณ (บาท) <span class="hint">ถ้ามี</span></label><input id="cost" type="number" min="0" inputmode="numeric"></div>
+      <div><label>ผู้สูงอายุกลุ่มนี้ที่ดูแลในรอบ 12 เดือน (คน) <span class="hint">ถ้ามี</span></label><input id="past12" type="number" min="0" inputmode="numeric"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>ส่วนที่ 3 ปัญหาและความต้องการสนับสนุน</h2>
+    <label>ปัญหาหลักในการส่งต่อผู้ป่วยกลุ่มนี้ <span class="hint">(ตอบได้หลายข้อ)</span></label>
+    <div class="chk" id="problems"></div>
+    <input id="problemOther" placeholder="อื่น ๆ ระบุ" style="margin-top:6px">
+    <label>การสนับสนุนที่ต้องการเร่งด่วนที่สุด 3 อันดับ</label>
+    <div class="grid"><input id="support1" placeholder="อันดับ 1"><input id="support2" placeholder="อันดับ 2"><input id="support3" placeholder="อันดับ 3"></div>
+    <label>รายที่เร่งด่วนที่สุด <span class="hint">(ระบุรหัสผู้ป่วยและเหตุผล เช่น นอนนานที่สุด สงสัยถูกทำร้าย)</span></label>
+    <input id="urgent">
+    <label>ข้อเสนอแนะอื่น ๆ</label><textarea id="suggestion" rows="3"></textarea>
+  </div>
+
+  <div id="formErr" class="err" style="margin-bottom:10px"></div>
+  <button type="submit" class="btn big" id="submitBtn">ส่งข้อมูล</button>
+  <footer>ข้อมูลใช้เพื่อประสานการดูแลระหว่าง สธ. และ พม. เท่านั้น</footer>
+</form>
+
+<div id="msg" class="card hidden"></div>
+</main>
+
+<template id="ptTpl">
+  <div class="pt">
+    <div class="pt-h"><b class="pcode"></b><button type="button" class="btn-x del">ลบ ✕</button></div>
+    <div class="grid">
+      <div><label>เพศ <span class="req">*</span></label><select data-k="sex" required><option value="">—</option><option>ชาย</option><option>หญิง</option></select></div>
+      <div><label>อายุ (ปี) <span class="req">*</span></label><input data-k="age" type="number" min="60" max="120" required inputmode="numeric"></div>
+      <div><label>ประเภทเตียง <span class="req">*</span></label><select data-k="bedType" required><option value="">—</option><option>สามัญ</option><option>พิเศษ</option><option>ICU/กึ่งวิกฤต</option></select></div>
+      <div><label>หอผู้ป่วย</label><input data-k="ward"></div>
+      <div><label>วันที่ admit <span class="req">*</span></label><input data-k="admitDate" type="date" required></div>
+      <div><label>วันที่แพทย์ลงว่าพร้อมจำหน่าย <span class="hint">เว้นว่างถ้ายังต้องรักษา</span></label><input data-k="readyDate" type="date"></div>
+    </div>
+    <p style="margin:6px 0 0">วันนอนเกินจำเป็น: <span class="calc exc">–</span></p>
+    <div class="grid">
+      <div><label>สิทธิการรักษา</label><select data-k="right"><option value="">—</option><option>บัตรทอง (UC)</option><option>ข้าราชการ/รัฐวิสาหกิจ</option><option>ประกันสังคม</option><option>บุคคลที่มีปัญหาสถานะและสิทธิ</option><option>ไม่มีสิทธิ/ชำระเอง</option></select></div>
+      <div><label>สถานะทางทะเบียน</label><select data-k="idStatus"><option value="">—</option><option>มีเลขบัตรประชาชน</option><option>ไม่ทราบชื่อ/ไม่ทราบตัวตน</option><option>ไม่มีสัญชาติไทย/ไร้สถานะ</option></select></div>
+      <div><label>การวินิจฉัยหลัก</label><input data-k="diagnosis" placeholder="เช่น Old CVA"></div>
+      <div><label>ADL (Barthel 0–20)</label><input data-k="adl" type="number" min="0" max="20" inputmode="numeric"></div>
+    </div>
+    <p style="margin:6px 0 0">ระดับการพึ่งพา: <span class="calc dep">–</span></p>
+    <label>การดูแลพิเศษที่ต้องใช้ <span class="hint">(ตอบได้หลายข้อ)</span></label>
+    <div class="chk care"></div>
+    <div class="grid">
+      <div><label>สถานะญาติ <span class="req">*</span></label><select data-k="family" required><option value="">—</option><option>ไม่มีญาติ</option><option>มีญาติแต่ติดต่อไม่ได้</option><option>ติดต่อได้แต่ปฏิเสธรับกลับ</option><option>ญาติยินดีแต่ไม่มีศักยภาพดูแล</option><option>สงสัยถูกทำร้าย/แสวงหาประโยชน์</option></select></div>
+      <div><label>สาเหตุหลักที่จำหน่ายไม่ได้ <span class="req">*</span></label><select data-k="reason" required><option value="">—</option><option>ไม่มีผู้ดูแล</option><option>ไม่มีที่อยู่อาศัย</option><option>สถานสงเคราะห์เต็ม/ไม่รับรายมีอุปกรณ์</option><option>รอพิสูจน์ตัวตน/เอกสารสิทธิ</option><option>ติดขั้นตอนกฎหมาย (ผู้พิทักษ์/ผู้อนุบาล)</option><option>ยังต้องรักษาทางการแพทย์</option><option>อื่น ๆ</option></select></div>
+      <div><label>ประสาน พม./อปท. แล้วหรือยัง</label><select data-k="coordination"><option value="">—</option><option>ยังไม่ได้ประสาน</option><option>แจ้ง พมจ. แล้ว รอผล</option><option>ประสาน อปท./ผู้นำชุมชนแล้ว</option><option>ประสานแล้วแต่ไม่มีที่รองรับ</option></select></div>
+      <div><label>สถานที่รองรับที่เหมาะสม <span class="req">*</span></label><select data-k="placement" required><option value="">—</option><option>กลับชุมชนพร้อม Caregiver/LTC</option><option>ศูนย์พัฒนาการจัดสวัสดิการสังคมผู้สูงอายุ (พม.)</option><option>สถานชีวาภิบาล/Intermediate care</option><option>สถานดูแลเอกชน (Nursing home)</option><option>หน่วยดูแลแบบประคับประคอง</option><option>อื่น ๆ</option></select></div>
+    </div>
+  </div>
+</template>
+
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const CARE = ['ใส่สายให้อาหาร','แผลกดทับ','เจาะคอ/ใช้ออกซิเจน','สายสวนปัสสาวะ','ฟอกไต/ยาฉีดต่อเนื่อง','สมองเสื่อม/พฤติกรรมต้องเฝ้าระวัง','จิตเวช','ระยะท้าย/ประคับประคอง'];
+const PROBLEMS = ['สถานรองรับของ พม. ไม่เพียงพอ/เต็ม','สถานรองรับไม่รับผู้ป่วยติดเตียงหรือมีอุปกรณ์การแพทย์','พิสูจน์ตัวตน/สิทธิใช้เวลานาน','ไม่มีผู้มีอำนาจตัดสินใจแทนผู้ป่วย','ไม่มีงบประมาณค่าดูแลหลังจำหน่าย','ชุมชน/อปท. ไม่มีระบบ LTC รองรับ','ไม่มีจุดรับเรื่องที่ชัดเจนระหว่าง สธ.–พม.–ท้องถิ่น'];
+let HOSP = [], seq = 0;
+const today = new Date(); today.setHours(0,0,0,0);
+
+PROBLEMS.forEach(p => $('problems').insertAdjacentHTML('beforeend', `<label><input type="checkbox" value="${p}"> ${p}</label>`));
+
+async function loadHosp() {
+  try {
+    const r = await fetch(API_URL + '?action=hospitals');
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error);
+    HOSP = j.hospitals;
+    const regions = [...new Set(HOSP.map(h => h.region))].sort((a,b) => a - b);
+    regions.forEach(x => $('region').insertAdjacentHTML('beforeend', `<option value="${x}">เขตสุขภาพที่ ${x}</option>`));
+    fillHosp();
+    $('loading').classList.add('hidden'); $('f').classList.remove('hidden');
+    if (!HOSP.length) { $('loading').textContent = 'ทุกโรงพยาบาลส่งข้อมูลครบแล้ว ขอบคุณครับ'; $('loading').classList.remove('hidden'); $('f').classList.add('hidden'); }
+  } catch (e) {
+    $('loading').innerHTML = 'โหลดรายชื่อโรงพยาบาลไม่สำเร็จ โปรดรีเฟรชหน้า<br><span class="err">' + e.message + '</span>';
+  }
+}
+function fillHosp() {
+  const rg = $('region').value, sel = $('hosp'), cur = sel.value;
+  sel.innerHTML = '<option value="">— เลือกโรงพยาบาล —</option>';
+  HOSP.filter(h => !rg || h.region === rg).sort((a,b) => a.region - b.region || a.name.localeCompare(b.name, 'th'))
+    .forEach(h => sel.insertAdjacentHTML('beforeend', `<option value="${h.code}">${h.name} (${h.code}) · เขต ${h.region}</option>`));
+  sel.value = cur;
+}
+$('region').onchange = fillHosp;
+$('hosp').onchange = () => { const h = HOSP.find(x => x.code === $('hosp').value); if (h && h.beds && !$('bedsActual').value) $('bedsActual').value = h.beds; renumber(); };
+
+function pad(n) { return String(n).padStart(3, '0'); }
+function renumber() {
+  const code = $('hosp').value || 'รพ';
+  document.querySelectorAll('.pt').forEach((el, i) => { el.dataset.pcode = code + '-' + pad(i + 1); el.querySelector('.pcode').textContent = 'ผู้ป่วยรายที่ ' + (i + 1) + ' · รหัส ' + el.dataset.pcode; });
+  summary();
+}
+function addPt() {
+  const node = $('ptTpl').content.firstElementChild.cloneNode(true);
+  const id = ++seq;
+  node.querySelector('.care').innerHTML = CARE.map(c => `<label><input type="checkbox" value="${c}"> ${c}</label>`).join('');
+  node.querySelector('.del').onclick = () => { if (confirm('ลบผู้ป่วยรายนี้?')) { node.remove(); renumber(); } };
+  node.addEventListener('input', () => calc(node));
+  node.addEventListener('change', () => calc(node));
+  $('pts').appendChild(node); renumber();
+}
+function excessDays(ready) { if (!ready) return null; const d = new Date(ready); d.setHours(0,0,0,0); return Math.max(0, Math.round((today - d) / 864e5)); }
+function depOf(adl) { if (adl === '' || adl == null) return ''; adl = Number(adl); return adl >= 12 ? 'ติดสังคม (ADL 12–20)' : adl >= 5 ? 'ติดบ้าน (ADL 5–11)' : 'ติดเตียง (ADL 0–4)'; }
+function calc(node) {
+  const v = k => node.querySelector(`[data-k="${k}"]`).value;
+  const ex = excessDays(v('readyDate'));
+  node.querySelector('.exc').textContent = ex === null ? 'ยังต้องรักษา' : ex + ' วัน';
+  node.querySelector('.dep').textContent = depOf(v('adl')) || '–';
+  summary();
+}
+function collectPts() {
+  return [...document.querySelectorAll('.pt')].map(node => {
+    const o = { patientCode: node.dataset.pcode };
+    node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
+    o.excessDays = excessDays(o.readyDate) ?? '';
+    o.dependency = depOf(o.adl);
+    o.specialCare = [...node.querySelectorAll('.care input:checked')].map(x => x.value);
+    return o;
+  });
+}
+function summary() {
+  const p = collectPts();
+  const ready = p.filter(x => x.readyDate);
+  const items = [
+    ['ผู้ป่วยทั้งหมด', p.length + ' คน'],
+    ['ชาย / หญิง', p.filter(x => x.sex === 'ชาย').length + ' / ' + p.filter(x => x.sex === 'หญิง').length],
+    ['พร้อมจำหน่ายแล้ว', ready.length + ' คน'],
+    ['ยังต้องรักษา', (p.length - ready.length) + ' คน'],
+    ['เตียง สามัญ/พิเศษ/ICU', ['สามัญ','พิเศษ','ICU/กึ่งวิกฤต'].map(t => p.filter(x => x.bedType === t).length).join(' / ')],
+    ['รวมวันนอนเกินจำเป็น', ready.reduce((s, x) => s + (Number(x.excessDays) || 0), 0).toLocaleString() + ' วัน']
+  ];
+  $('sum').innerHTML = items.map(([a, b]) => `<div>${a}<b>${b}</b></div>`).join('');
+}
+$('addPt').onclick = addPt;
+$('noPatients').onchange = () => $('ptWrap').classList.toggle('hidden', $('noPatients').checked);
+
+$('f').onsubmit = async ev => {
+  ev.preventDefault();
+  const errs = [];
+  document.querySelectorAll('.bad').forEach(x => x.classList.remove('bad'));
+  ['hosp','contactName','contactPhone'].forEach(id => { if (!$(id).value.trim()) { errs.push(id); $(id).style.borderColor = 'var(--red)'; } else $(id).style.borderColor = ''; });
+  const noP = $('noPatients').checked;
+  const nodes = [...document.querySelectorAll('.pt')];
+  if (!noP && !nodes.length) errs.push('pts');
+  if (!noP) nodes.forEach(n => n.querySelectorAll('[required]').forEach(el => { const bad = !el.value || (el.type === 'number' && !el.checkValidity()); el.style.borderColor = bad ? 'var(--red)' : ''; if (bad) errs.push(el); }));
+  if (errs.length) {
+    $('formErr').textContent = errs.includes('pts') ? 'โปรดเพิ่มผู้ป่วยอย่างน้อย 1 ราย หรือติ๊ก “ไม่มีผู้ป่วยกลุ่มนี้”' : 'โปรดกรอกช่องที่มี * ให้ครบ (ช่องที่ยังไม่ครบมีกรอบสีแดง)';
+    const first = typeof errs[0] === 'string' ? $(errs[0] === 'pts' ? 'addPt' : errs[0]) : errs[0];
+    first && first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  const h = HOSP.find(x => x.code === $('hosp').value);
+  const pts = noP ? [] : collectPts();
+  if (!confirm(`ยืนยันส่งข้อมูลของ รพ.${h.name}\nจำนวนผู้ป่วย ${pts.length} ราย\n\nส่งแล้วจะแก้ไขเองไม่ได้`)) return;
+  const v = id => $(id).value.trim();
+  const body = {
+    code: h.code, bedsActual: v('bedsActual'), occupancy: v('occupancy'), contactName: v('contactName'), contactPosition: v('contactPosition'),
+    contactPhone: v('contactPhone'), contactEmail: v('contactEmail'), approver: v('approver'), noPatients: noP, patients: pts,
+    cost: v('cost'), past12: v('past12'), problems: [...document.querySelectorAll('#problems input:checked')].map(x => x.value),
+    problemOther: v('problemOther'), support1: v('support1'), support2: v('support2'), support3: v('support3'), urgent: v('urgent'), suggestion: v('suggestion')
+  };
+  $('submitBtn').disabled = true; $('submitBtn').textContent = 'กำลังส่ง…'; $('formErr').textContent = '';
+  try {
+    // text/plain เพื่อเลี่ยง CORS preflight ของ Apps Script
+    const r = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error);
+    $('f').classList.add('hidden');
+    $('msg').innerHTML = `<h2 style="color:var(--g)">ส่งข้อมูลเรียบร้อย ✓</h2><p>รพ.${h.name} · ผู้ป่วย ${j.count} ราย<br>ขอบคุณที่ให้ความร่วมมือ</p>`;
+    $('msg').classList.remove('hidden'); window.scrollTo(0, 0);
+  } catch (e) {
+    $('formErr').textContent = 'ส่งไม่สำเร็จ: ' + e.message;
+    $('submitBtn').disabled = false; $('submitBtn').textContent = 'ส่งข้อมูล';
+  }
+};
+
+window.addEventListener('beforeunload', e => { if (document.querySelector('.pt') && $('msg').classList.contains('hidden')) { e.preventDefault(); e.returnValue = ''; } });
+addPt(); loadHosp();
+</script>
+</body>
+</html>

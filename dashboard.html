@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard · ผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์/รพ.ทั่วไป</title>
+<link rel="icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --g:#006838; --g-l:#7fb89a; --g2:#e8f3ec; --line:#dde4e0; --ink:#1d2a22; --mute:#5d6b62; --amber:#c27c0e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Sarabun',system-ui,sans-serif; color:var(--ink); background:#f4f7f5; font-size:15px; }
+  header { background:var(--g); color:#fff; padding:14px 18px; }
+  .hd { max-width:1280px; margin:auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .hd img { width:52px; height:52px; background:#fff; border-radius:50%; padding:2px; }
+  .hd h1 { font-size:20px; margin:0; }
+  .hd p { margin:0; opacity:.85; font-size:13.5px; }
+  .hd .sp { flex:1; }
+  .hd select, .hd button { font:inherit; padding:7px 10px; border-radius:8px; border:0; }
+  .hd button { background:#fff; color:var(--g); font-weight:600; cursor:pointer; }
+  main { max-width:1280px; margin:auto; padding:16px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-bottom:14px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .kpi .l { color:var(--mute); font-size:14px; }
+  .kpi .v { font-size:32px; font-weight:700; color:var(--g); line-height:1.2; }
+  .kpi .s { font-size:13px; color:var(--mute); }
+  .prog { height:8px; background:var(--g2); border-radius:4px; margin-top:6px; overflow:hidden; }
+  .prog i { display:block; height:100%; background:var(--g); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); gap:14px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { font-size:16.5px; margin:0 0 10px; }
+  .card h2 small { font-weight:400; color:var(--mute); font-size:13px; }
+  .bar { display:grid; grid-template-columns:minmax(120px,42%) 1fr 54px; gap:8px; align-items:center; margin:5px 0; font-size:14px; }
+  .bar .t { background:var(--g2); border-radius:4px; height:18px; overflow:hidden; display:flex; }
+  .bar .t i { display:block; height:100%; }
+  .bar .n { text-align:right; font-variant-numeric:tabular-nums; font-weight:600; }
+  .legend { display:flex; gap:14px; font-size:13px; color:var(--mute); margin-bottom:6px; }
+  .legend span::before { content:''; display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; background:var(--c); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { padding:7px 8px; border-bottom:1px solid var(--line); text-align:left; }
+  th { background:var(--g2); position:sticky; top:0; cursor:pointer; white-space:nowrap; }
+  td:nth-child(2) { min-width:150px; }
+  td.r, th.r { text-align:right; font-variant-numeric:tabular-nums; }
+  .tbl { max-height:520px; overflow:auto; }
+  .pill { display:inline-block; white-space:nowrap; padding:1px 8px; border-radius:10px; font-size:12.5px; }
+  .ok { background:var(--g2); color:var(--g); }
+  .no { background:#fdf0dc; color:var(--amber); }
+  .tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .tabs button { font:inherit; border:1px solid var(--line); background:#fff; padding:6px 12px; border-radius:16px; cursor:pointer; }
+  .tabs button.on { background:var(--g); color:#fff; border-color:var(--g); }
+  #err { color:#b42318; }
+  .muted { color:var(--mute); }
+</style>
+</head>
+<body>
+<header><div class="hd">
+  <img src="logo.png" alt="">
+  <div><h1>Dashboard ผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
+  <p id="upd">กำลังโหลด…</p></div>
+  <div class="sp"></div>
+  <select id="rg"><option value="">ทั้งประเทศ</option></select>
+  <button id="csv">ดาวน์โหลด CSV รายคน</button>
+  <button id="ref">รีเฟรช</button>
+</div></header>
+<main>
+  <div id="err"></div>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card">
+    <h2>รายเขตสุขภาพ <small>จำนวนผู้ป่วย แยกพร้อมจำหน่าย / ยังต้องรักษา · และอัตราการส่งข้อมูล</small></h2>
+    <div class="legend"><span style="--c:var(--g)">พร้อมจำหน่ายแล้ว</span><span style="--c:var(--g-l)">ยังต้องรักษา</span></div>
+    <div id="byRegion"></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h2>สถานที่รองรับที่ต้องการ <small>คน</small></h2><div id="placement"></div></div>
+    <div class="card"><h2>สาเหตุหลักที่จำหน่ายไม่ได้ <small>คน</small></h2><div id="reason"></div></div>
+    <div class="card"><h2>สถานะญาติ <small>คน</small></h2><div id="family"></div></div>
+    <div class="card"><h2>ระดับการพึ่งพา (ADL) <small>คน</small></h2><div id="dep"></div></div>
+    <div class="card"><h2>การดูแลพิเศษที่ต้องใช้ <small>คน (ตอบได้หลายข้อ)</small></h2><div id="care"></div></div>
+    <div class="card"><h2>ปัญหาที่ รพ. รายงาน <small>จำนวน รพ.</small></h2><div id="problems"></div></div>
+    <div class="card"><h2>วันนอนเกินจำเป็น <small>คน แยกตามช่วงวัน</small></h2><div id="excess"></div></div>
+    <div class="card"><h2>สถานะการประสาน พม./อปท. <small>คน</small></h2><div id="coord"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>รายโรงพยาบาล</h2>
+    <div class="tabs" id="tabs">
+      <button data-v="all" class="on">ทั้งหมด</button><button data-v="done">ส่งแล้ว</button><button data-v="pending">ยังไม่ส่ง</button>
+    </div>
+    <div class="tbl"><table id="tbl"></table></div>
+  </div>
+</main>
+
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+let D = null, tab = 'all', sortKey = 'pt', sortDir = -1;
+const num = x => Number(x) || 0;
+const fmt = x => num(x).toLocaleString('th-TH');
+
+async function load() {
+  $('upd').textContent = 'กำลังโหลด…';
+  try {
+    const r = await fetch(API_URL + '?action=dashboard');
+    D = await r.json();
+    if (!D.ok) throw new Error(D.error);
+    $('err').textContent = '';
+    if ($('rg').options.length === 1)
+      [...new Set(D.hospitals.map(h => h.region))].sort((a,b) => a - b).forEach(x => $('rg').insertAdjacentHTML('beforeend', `<option value="${x}">เขตสุขภาพที่ ${x}</option>`));
+    render();
+    $('upd').textContent = 'ข้อมูล ณ ' + D.updated + ' น. · รีเฟรชอัตโนมัติทุก 2 นาที';
+  } catch (e) { $('err').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message; }
+}
+
+function bars(el, entries, total, color) {
+  const max = Math.max(1, ...entries.map(e => e[1]));
+  $(el).innerHTML = entries.length ? entries.map(([k, v]) =>
+    `<div class="bar"><span>${k}</span><div class="t"><i style="width:${v / max * 100}%;background:${color || 'var(--g)'}"></i></div><span class="n">${fmt(v)}</span></div>`).join('')
+    : '<p class="muted">ยังไม่มีข้อมูล</p>';
+}
+function count(list, key, order) {
+  const m = {};
+  list.forEach(p => String(p[key] || '').split(',').map(s => s.trim()).filter(Boolean).forEach(v => m[v] = (m[v] || 0) + 1));
+  let e = Object.entries(m);
+  if (order) e.sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0])); else e.sort((a, b) => b[1] - a[1]);
+  return e;
+}
+
+function render() {
+  const rg = $('rg').value;
+  const H = D.hospitals.filter(h => !rg || String(h.region) === rg);
+  const R = D.responses.filter(r => !rg || String(r.Region) === rg);
+  const P = D.patients.filter(p => !rg || String(p.Region) === rg);
+  const ready = P.filter(p => p.ReadyDate !== '' && p.ReadyDate != null);
+  const excess = ready.reduce((s, p) => s + num(p.ExcessDays), 0);
+  const pct = H.length ? Math.round(R.length / H.length * 100) : 0;
+  const avgEx = ready.length ? Math.round(excess / ready.length) : 0;
+
+  $('kpis').innerHTML = [
+    ['โรงพยาบาลที่ส่งข้อมูลแล้ว', `${R.length}<span style="font-size:18px;color:var(--mute)"> / ${H.length}</span>`, `<div class="prog"><i style="width:${pct}%"></i></div>${pct}% · ยังไม่ส่ง ${H.length - R.length} แห่ง`],
+    ['ผู้สูงอายุที่ถูกละเลยทอดทิ้ง (ครองเตียง)', fmt(P.length), `ชาย ${P.filter(p => p.Sex === 'ชาย').length} · หญิง ${P.filter(p => p.Sex === 'หญิง').length} · ICU/กึ่งวิกฤต ${P.filter(p => p.BedType === 'ICU/กึ่งวิกฤต').length}`],
+    ['พร้อมจำหน่ายแล้ว รอที่รองรับ', fmt(ready.length), `${P.length ? Math.round(ready.length / P.length * 100) : 0}% ของผู้ป่วยทั้งหมด`],
+    ['รวมวันนอนเกินจำเป็น', fmt(excess), `เฉลี่ย ${avgEx} วัน/คน · นานสุด ${fmt(Math.max(0, ...ready.map(p => num(p.ExcessDays))))} วัน`],
+    ['ติดเตียง (ADL 0–4)', fmt(P.filter(p => String(p.Dependency).startsWith('ติดเตียง')).length), 'ต้องการสถานที่ที่รับผู้ป่วยติดเตียงได้']
+  ].map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+
+  // by region
+  const regs = [...new Set(D.hospitals.map(h => String(h.region)))].filter(x => !rg || x === rg).sort((a, b) => a - b);
+  const rows = regs.map(x => {
+    const pp = P.filter(p => String(p.Region) === x), rd = pp.filter(p => p.ReadyDate !== '' && p.ReadyDate != null).length;
+    const nh = D.hospitals.filter(h => String(h.region) === x).length, nr = D.responses.filter(r => String(r.Region) === x).length;
+    return { x, total: pp.length, rd, nh, nr };
+  });
+  const mx = Math.max(1, ...rows.map(r => r.total));
+  $('byRegion').innerHTML = rows.map(r => `<div class="bar" style="grid-template-columns:110px 1fr 54px 120px">
+      <span>เขต ${r.x}</span>
+      <div class="t"><i style="width:${r.rd / mx * 100}%;background:var(--g)"></i><i style="width:${(r.total - r.rd) / mx * 100}%;background:var(--g-l)"></i></div>
+      <span class="n">${fmt(r.total)}</span><span class="muted" style="font-size:13px">ส่งแล้ว ${r.nr}/${r.nh} รพ.</span></div>`).join('');
+
+  bars('placement', count(P, 'Placement'));
+  bars('reason', count(P, 'MainReason'));
+  bars('family', count(P, 'FamilyStatus'));
+  bars('dep', count(P, 'Dependency', ['ติดเตียง (ADL 0–4)', 'ติดบ้าน (ADL 5–11)', 'ติดสังคม (ADL 12–20)']));
+  bars('care', count(P, 'SpecialCare'));
+  bars('problems', count(R, 'Problems'));
+  bars('coord', count(P, 'Coordination'));
+  const bins = [['0–7 วัน', 0, 7], ['8–30 วัน', 8, 30], ['31–90 วัน', 31, 90], ['91–180 วัน', 91, 180], ['มากกว่า 180 วัน', 181, 1e9]];
+  bars('excess', bins.map(([k, a, b]) => [k, ready.filter(p => num(p.ExcessDays) >= a && num(p.ExcessDays) <= b).length]), 0, 'var(--amber)');
+
+  table(H, R, P);
+}
+
+function table(H, R, P) {
+  const rmap = Object.fromEntries(R.map(r => [String(r.Code), r]));
+  let list = H.map(h => {
+    const r = rmap[h.code], pp = P.filter(p => String(p.HospCode) === h.code);
+    return { code: h.code, name: h.name, region: num(h.region), level: h.level, done: !!r, time: r ? r.Timestamp : '',
+      pt: pp.length, rd: pp.filter(p => p.ReadyDate !== '' && p.ReadyDate != null).length, ex: pp.reduce((s, p) => s + num(p.ExcessDays), 0),
+      occ: r ? r.OccupancyPct : '', contact: r ? `${r.ContactName} ${String(r.ContactPhone).replace(/^'/, '')}` : '' };
+  });
+  if (tab === 'done') list = list.filter(x => x.done); if (tab === 'pending') list = list.filter(x => !x.done);
+  list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
+  const cols = [['region', 'เขต', 1], ['name', 'โรงพยาบาล'], ['level', 'ระดับ'], ['done', 'สถานะ'], ['pt', 'ผู้ป่วย', 1], ['rd', 'พร้อมจำหน่าย', 1], ['ex', 'วันนอนเกินรวม', 1], ['occ', 'ครองเตียง %', 1], ['contact', 'ผู้ประสานงาน'], ['time', 'เวลาส่ง']];
+  $('tbl').innerHTML = `<thead><tr>${cols.map(([k, t, r]) => `<th class="${r ? 'r' : ''}" data-k="${k}">${t}${sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead><tbody>` +
+    list.map(x => `<tr><td class="r">${x.region}</td><td>${x.name}</td><td class="muted">${String(x.level).split(' ')[0]}</td>
+      <td>${x.done ? '<span class="pill ok">ส่งแล้ว</span>' : '<span class="pill no">ยังไม่ส่ง</span>'}</td>
+      <td class="r">${x.done ? fmt(x.pt) : '–'}</td><td class="r">${x.done ? fmt(x.rd) : '–'}</td><td class="r">${x.done ? fmt(x.ex) : '–'}</td>
+      <td class="r">${x.occ === '' ? '–' : x.occ}</td><td>${x.contact}</td><td class="muted">${x.time}</td></tr>`).join('') + '</tbody>';
+  $('tbl').querySelectorAll('th').forEach(th => th.onclick = () => { const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : -1; sortKey = k; render(); });
+}
+
+$('tabs').onclick = e => { if (e.target.dataset.v) { tab = e.target.dataset.v; [...$('tabs').children].forEach(b => b.classList.toggle('on', b === e.target)); render(); } };
+$('rg').onchange = render;
+$('ref').onclick = load;
+$('csv').onclick = () => {
+  if (!D || !D.patients.length) return alert('ยังไม่มีข้อมูลรายคน');
+  const keys = Object.keys(D.patients[0]);
+  const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const csv = '﻿' + [keys.join(','), ...D.patients.filter(p => !$('rg').value || String(p.Region) === $('rg').value).map(p => keys.map(k => esc(p[k])).join(','))].join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'patients.csv'; a.click();
+};
+load(); setInterval(load, 120000);
+</script>
+</body>
+</html>
