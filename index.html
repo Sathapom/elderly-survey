@@ -51,6 +51,7 @@
 <header><div class="hd">
   <img src="logo.png" alt="ตรากระทรวงสาธารณสุข">
   <div><h1>แบบสำรวจผู้ถูกละเลยทอดทิ้ง<br>ซึ่งกำลังนอนรักษาตัวในโรงพยาบาล</h1>
+  <p>ผู้สำรวจ: คณะกรรมการพัฒนางานสังคมสงเคราะห์ในโรงพยาบาล สป.สธ.</p>
   <p>ข้อมูลด่วน · โปรดส่งภายในวันที่ 20 พฤศจิกายน 2569</p></div>
 </div></header>
 
@@ -205,16 +206,19 @@ function addPt() {
   $('pts').appendChild(node); renumber();
 }
 const MED = 'ยังต้องรักษาทางการแพทย์';
-function losDays(admit) { if (!admit) return null; const d = new Date(admit); d.setHours(0,0,0,0); return Math.max(0, Math.round((today - d) / 864e5)); }
+function normDate(v) { if (!v) return ''; let [y, m, d] = v.split('-').map(Number); if (y > 2400) y -= 543; return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0'); }
+function losDays(admit) { admit = normDate(admit); if (!admit) return null; const [y, m, d] = admit.split('-').map(Number); return Math.round((today - new Date(y, m - 1, d)) / 864e5); }
 function calc(node) {
-  const los = losDays(node.querySelector('[data-k="admitDate"]').value);
-  node.querySelector('.exc').textContent = los === null ? '–' : los.toLocaleString() + ' วัน';
+  const el = node.querySelector('[data-k="admitDate"]'), los = losDays(el.value);
+  el.dataset.bad = los !== null && (los < 0 || los > 3650) ? '1' : '';
+  node.querySelector('.exc').innerHTML = los === null ? '–' : el.dataset.bad ? '<span style="color:var(--red)">วันที่ไม่ถูกต้อง โปรดตรวจสอบ (ใช้ปี ค.ศ. หรือ พ.ศ. ก็ได้)</span>' : los.toLocaleString() + ' วัน';
   summary();
 }
 function collectPts() {
   return [...document.querySelectorAll('.pt')].map(node => {
     const o = { patientCode: node.dataset.pcode };
     node.querySelectorAll('[data-k]').forEach(el => o[el.dataset.k] = el.value.trim());
+    o.admitDate = normDate(o.admitDate);
     o.losDays = losDays(o.admitDate) ?? '';
     o.targetGroup = [...node.querySelectorAll('.grp input:checked')].map(x => x.value === 'อื่น ๆ' && o.groupOther ? 'อื่น ๆ: ' + o.groupOther : x.value);
     o.specialCare = [...node.querySelectorAll('.care input:checked')].map(x => x.value);
@@ -245,7 +249,7 @@ $('f').onsubmit = async ev => {
   const nodes = [...document.querySelectorAll('.pt')];
   if (!noP && !nodes.length) errs.push('pts');
   if (!noP) nodes.forEach(n => { const g = n.querySelector('.grp'); const bad = !g.querySelector('input:checked'); g.style.outline = bad ? '2px solid var(--red)' : ''; if (bad) errs.push(g); });
-  if (!noP) nodes.forEach(n => n.querySelectorAll('[required]').forEach(el => { const bad = !el.value || (el.type === 'number' && !el.checkValidity()); el.style.borderColor = bad ? 'var(--red)' : ''; if (bad) errs.push(el); }));
+  if (!noP) nodes.forEach(n => n.querySelectorAll('[required]').forEach(el => { const bad = !el.value || el.dataset.bad || (el.type === 'number' && !el.checkValidity()); el.style.borderColor = bad ? 'var(--red)' : ''; if (bad) errs.push(el); }));
   if (errs.length) {
     $('formErr').textContent = errs.includes('pts') ? 'โปรดเพิ่มผู้ป่วยอย่างน้อย 1 ราย หรือติ๊ก “ไม่มีผู้ป่วยกลุ่มนี้”' : 'โปรดกรอกช่องที่มี * ให้ครบ (ช่องที่ยังไม่ครบมีกรอบสีแดง)';
     const first = typeof errs[0] === 'string' ? $(errs[0] === 'pts' ? 'addPt' : errs[0]) : errs[0];
