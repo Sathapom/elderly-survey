@@ -77,7 +77,6 @@
     </div>
     <div class="grid">
       <div><label>เตียงที่ใช้จริง (เตียง)</label><input id="bedsActual" type="number" min="0" inputmode="numeric"></div>
-      <div><label>อัตราครองเตียงเดือนล่าสุด (%)</label><input id="occupancy" type="number" min="0" max="300" step="0.1" inputmode="decimal"></div>
     </div>
     <div class="grid">
       <div><label>ชื่อ-สกุลผู้ประสานงาน <span class="req">*</span></label><input id="contactName" required></div>
@@ -248,7 +247,7 @@ $('f').onsubmit = async ev => {
   if (!confirm(`ยืนยันส่งข้อมูลของ รพ.${h.name}\nจำนวนผู้ป่วย ${pts.length} ราย\n\nส่งแล้วจะแก้ไขเองไม่ได้`)) return;
   const v = id => $(id).value.trim();
   const body = {
-    code: h.code, bedsActual: v('bedsActual'), occupancy: v('occupancy'), contactName: v('contactName'), contactPosition: v('contactPosition'),
+    code: h.code, bedsActual: v('bedsActual'), contactName: v('contactName'), contactPosition: v('contactPosition'),
     contactPhone: v('contactPhone'), contactEmail: v('contactEmail'), noPatients: noP, patients: pts,
     cost: v('cost'), past12: v('past12'), problems: [...document.querySelectorAll('#problems input:checked')].map(x => x.value),
     problemOther: v('problemOther'), support1: v('support1'), support2: v('support2'), support3: v('support3'), urgent: v('urgent'), suggestion: v('suggestion')
