@@ -67,8 +67,8 @@
   <div class="kpis" id="kpis"></div>
 
   <div class="card">
-    <h2>รายเขตสุขภาพ <small>จำนวนผู้ป่วย แยกพร้อมจำหน่าย / ยังต้องรักษา · และอัตราการส่งข้อมูล</small></h2>
-    <div class="legend"><span style="--c:var(--g)">พร้อมจำหน่ายแล้ว</span><span style="--c:var(--g-l)">ยังต้องรักษา</span></div>
+    <h2>รายเขตสุขภาพ <small>จำนวนผู้ป่วย แยกติดปัญหาทางสังคม / ยังต้องรักษาทางการแพทย์ · และอัตราการส่งข้อมูล</small></h2>
+    <div class="legend"><span style="--c:var(--g)">ติดปัญหาทางสังคม</span><span style="--c:var(--g-l)">ยังต้องรักษาทางการแพทย์</span></div>
     <div id="byRegion"></div>
   </div>
 
@@ -76,11 +76,11 @@
     <div class="card"><h2>สถานที่รองรับที่ต้องการ <small>คน</small></h2><div id="placement"></div></div>
     <div class="card"><h2>สาเหตุหลักที่จำหน่ายไม่ได้ <small>คน</small></h2><div id="reason"></div></div>
     <div class="card"><h2>สถานะญาติ <small>คน</small></h2><div id="family"></div></div>
-    <div class="card"><h2>ระดับการพึ่งพา (ADL) <small>คน</small></h2><div id="dep"></div></div>
+    <div class="card"><h2>สิทธิการรักษา <small>คน</small></h2><div id="right"></div></div>
     <div class="card"><h2>การดูแลพิเศษที่ต้องใช้ <small>คน (ตอบได้หลายข้อ)</small></h2><div id="care"></div></div>
     <div class="card"><h2>ปัญหาที่ รพ. รายงาน <small>จำนวน รพ.</small></h2><div id="problems"></div></div>
-    <div class="card"><h2>วันนอนเกินจำเป็น <small>คน แยกตามช่วงวัน</small></h2><div id="excess"></div></div>
-    <div class="card"><h2>สถานะการประสาน พม./อปท. <small>คน</small></h2><div id="coord"></div></div>
+    <div class="card"><h2>จำนวนวันนอนถึงวันส่งข้อมูล <small>คน แยกตามช่วงวัน</small></h2><div id="excess"></div></div>
+    <div class="card"><h2>สถานะทางทะเบียน <small>คน</small></h2><div id="idst"></div></div>
   </div>
 
   <div class="card">
@@ -132,41 +132,42 @@ function render() {
   const H = D.hospitals.filter(h => !rg || String(h.region) === rg);
   const R = D.responses.filter(r => !rg || String(r.Region) === rg);
   const P = D.patients.filter(p => !rg || String(p.Region) === rg);
-  const ready = P.filter(p => p.ReadyDate !== '' && p.ReadyDate != null);
-  const excess = ready.reduce((s, p) => s + num(p.ExcessDays), 0);
+  const MED = 'ยังต้องรักษาทางการแพทย์';
+  const isSoc = p => p.MainReason !== MED;
+  const soc = P.filter(isSoc);
+  const los = P.reduce((s, p) => s + num(p.LOSDays), 0);
   const pct = H.length ? Math.round(R.length / H.length * 100) : 0;
-  const avgEx = ready.length ? Math.round(excess / ready.length) : 0;
+  const avg = P.length ? Math.round(los / P.length) : 0;
 
   $('kpis').innerHTML = [
     ['โรงพยาบาลที่ส่งข้อมูลแล้ว', `${R.length}<span style="font-size:18px;color:var(--mute)"> / ${H.length}</span>`, `<div class="prog"><i style="width:${pct}%"></i></div>${pct}% · ยังไม่ส่ง ${H.length - R.length} แห่ง`],
-    ['ผู้สูงอายุที่ถูกละเลยทอดทิ้ง (ครองเตียง)', fmt(P.length), `ชาย ${P.filter(p => p.Sex === 'ชาย').length} · หญิง ${P.filter(p => p.Sex === 'หญิง').length} · ICU/กึ่งวิกฤต ${P.filter(p => p.BedType === 'ICU/กึ่งวิกฤต').length}`],
-    ['พร้อมจำหน่ายแล้ว รอที่รองรับ', fmt(ready.length), `${P.length ? Math.round(ready.length / P.length * 100) : 0}% ของผู้ป่วยทั้งหมด`],
-    ['รวมวันนอนเกินจำเป็น', fmt(excess), `เฉลี่ย ${avgEx} วัน/คน · นานสุด ${fmt(Math.max(0, ...ready.map(p => num(p.ExcessDays))))} วัน`],
-    ['ติดเตียง (ADL 0–4)', fmt(P.filter(p => String(p.Dependency).startsWith('ติดเตียง')).length), 'ต้องการสถานที่ที่รับผู้ป่วยติดเตียงได้']
+    ['ผู้สูงอายุที่ถูกละเลยทอดทิ้ง (ครองเตียง)', fmt(P.length), `ชาย ${P.filter(p => p.Sex === 'ชาย').length} · หญิง ${P.filter(p => p.Sex === 'หญิง').length}`],
+    ['ติดปัญหาทางสังคม (ไม่ใช่เหตุทางการแพทย์)', fmt(soc.length), `${P.length ? Math.round(soc.length / P.length * 100) : 0}% ของผู้ป่วยทั้งหมด`],
+    ['รวมวันนอน (เตียง-วัน)', fmt(los), `เฉลี่ย ${avg} วัน/คน · นานสุด ${fmt(Math.max(0, ...P.map(p => num(p.LOSDays))))} วัน`],
+    ['นอนนานเกิน 30 วัน', fmt(P.filter(p => num(p.LOSDays) > 30).length), 'คน']
   ].map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
 
-  // by region
   const regs = [...new Set(D.hospitals.map(h => String(h.region)))].filter(x => !rg || x === rg).sort((a, b) => a - b);
   const rows = regs.map(x => {
-    const pp = P.filter(p => String(p.Region) === x), rd = pp.filter(p => p.ReadyDate !== '' && p.ReadyDate != null).length;
+    const pp = P.filter(p => String(p.Region) === x), sc = pp.filter(isSoc).length;
     const nh = D.hospitals.filter(h => String(h.region) === x).length, nr = D.responses.filter(r => String(r.Region) === x).length;
-    return { x, total: pp.length, rd, nh, nr };
+    return { x, total: pp.length, sc, nh, nr };
   });
   const mx = Math.max(1, ...rows.map(r => r.total));
   $('byRegion').innerHTML = rows.map(r => `<div class="bar" style="grid-template-columns:110px 1fr 54px 120px">
       <span>เขต ${r.x}</span>
-      <div class="t"><i style="width:${r.rd / mx * 100}%;background:var(--g)"></i><i style="width:${(r.total - r.rd) / mx * 100}%;background:var(--g-l)"></i></div>
+      <div class="t"><i style="width:${r.sc / mx * 100}%;background:var(--g)"></i><i style="width:${(r.total - r.sc) / mx * 100}%;background:var(--g-l)"></i></div>
       <span class="n">${fmt(r.total)}</span><span class="muted" style="font-size:13px">ส่งแล้ว ${r.nr}/${r.nh} รพ.</span></div>`).join('');
 
   bars('placement', count(P, 'Placement'));
   bars('reason', count(P, 'MainReason'));
   bars('family', count(P, 'FamilyStatus'));
-  bars('dep', count(P, 'Dependency', ['ติดเตียง (ADL 0–4)', 'ติดบ้าน (ADL 5–11)', 'ติดสังคม (ADL 12–20)']));
+  bars('right', count(P, 'Right'));
   bars('care', count(P, 'SpecialCare'));
   bars('problems', count(R, 'Problems'));
-  bars('coord', count(P, 'Coordination'));
+  bars('idst', count(P, 'IdStatus'));
   const bins = [['0–7 วัน', 0, 7], ['8–30 วัน', 8, 30], ['31–90 วัน', 31, 90], ['91–180 วัน', 91, 180], ['มากกว่า 180 วัน', 181, 1e9]];
-  bars('excess', bins.map(([k, a, b]) => [k, ready.filter(p => num(p.ExcessDays) >= a && num(p.ExcessDays) <= b).length]), 0, 'var(--amber)');
+  bars('excess', bins.map(([k, a, b]) => [k, P.filter(p => num(p.LOSDays) >= a && num(p.LOSDays) <= b).length]), 0, 'var(--amber)');
 
   table(H, R, P);
 }
@@ -176,12 +177,12 @@ function table(H, R, P) {
   let list = H.map(h => {
     const r = rmap[h.code], pp = P.filter(p => String(p.HospCode) === h.code);
     return { code: h.code, name: h.name, region: num(h.region), level: h.level, done: !!r, time: r ? r.Timestamp : '',
-      pt: pp.length, rd: pp.filter(p => p.ReadyDate !== '' && p.ReadyDate != null).length, ex: pp.reduce((s, p) => s + num(p.ExcessDays), 0),
+      pt: pp.length, rd: pp.filter(p => p.MainReason !== 'ยังต้องรักษาทางการแพทย์').length, ex: pp.reduce((s, p) => s + num(p.LOSDays), 0),
       occ: r ? r.OccupancyPct : '', contact: r ? `${r.ContactName} ${String(r.ContactPhone).replace(/^'/, '')}` : '' };
   });
   if (tab === 'done') list = list.filter(x => x.done); if (tab === 'pending') list = list.filter(x => !x.done);
   list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
-  const cols = [['region', 'เขต', 1], ['name', 'โรงพยาบาล'], ['level', 'ระดับ'], ['done', 'สถานะ'], ['pt', 'ผู้ป่วย', 1], ['rd', 'พร้อมจำหน่าย', 1], ['ex', 'วันนอนเกินรวม', 1], ['occ', 'ครองเตียง %', 1], ['contact', 'ผู้ประสานงาน'], ['time', 'เวลาส่ง']];
+  const cols = [['region', 'เขต', 1], ['name', 'โรงพยาบาล'], ['level', 'ระดับ'], ['done', 'สถานะ'], ['pt', 'ผู้ป่วย', 1], ['rd', 'ติดปัญหาสังคม', 1], ['ex', 'วันนอนรวม', 1], ['occ', 'ครองเตียง %', 1], ['contact', 'ผู้ประสานงาน'], ['time', 'เวลาส่ง']];
   $('tbl').innerHTML = `<thead><tr>${cols.map(([k, t, r]) => `<th class="${r ? 'r' : ''}" data-k="${k}">${t}${sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('')}</tr></thead><tbody>` +
     list.map(x => `<tr><td class="r">${x.region}</td><td>${x.name}</td><td class="muted">${String(x.level).split(' ')[0]}</td>
       <td>${x.done ? '<span class="pill ok">ส่งแล้ว</span>' : '<span class="pill no">ยังไม่ส่ง</span>'}</td>
