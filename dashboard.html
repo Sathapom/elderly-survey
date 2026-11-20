@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard · ผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์/รพ.ทั่วไป</title>
+<title>Dashboard · ผู้ถูกละเลยทอดทิ้งใน รพ.ศูนย์/รพ.ทั่วไป</title>
 <link rel="icon" href="logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -55,7 +55,7 @@
 <body>
 <header><div class="hd">
   <img src="logo.png" alt="">
-  <div><h1>Dashboard ผู้สูงอายุที่ถูกละเลยทอดทิ้งใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
+  <div><h1>Dashboard ผู้ถูกละเลยทอดทิ้งใน รพ.ศูนย์ / รพ.ทั่วไป</h1>
   <p id="upd">กำลังโหลด…</p></div>
   <div class="sp"></div>
   <select id="rg"><option value="">ทั้งประเทศ</option></select>
@@ -73,6 +73,8 @@
   </div>
 
   <div class="grid">
+    <div class="card"><h2>กลุ่มเป้าหมาย <small>คน (1 คนอยู่ได้หลายกลุ่ม)</small></h2><div id="group"></div></div>
+    <div class="card"><h2>ช่วงอายุ <small>คน</small></h2><div id="ageg"></div></div>
     <div class="card"><h2>สถานที่รองรับที่ต้องการ <small>คน</small></h2><div id="placement"></div></div>
     <div class="card"><h2>สาเหตุหลักที่จำหน่ายไม่ได้ <small>คน</small></h2><div id="reason"></div></div>
     <div class="card"><h2>สถานะญาติ <small>คน</small></h2><div id="family"></div></div>
@@ -141,7 +143,7 @@ function render() {
 
   $('kpis').innerHTML = [
     ['โรงพยาบาลที่ส่งข้อมูลแล้ว', `${R.length}<span style="font-size:18px;color:var(--mute)"> / ${H.length}</span>`, `<div class="prog"><i style="width:${pct}%"></i></div>${pct}% · ยังไม่ส่ง ${H.length - R.length} แห่ง`],
-    ['ผู้สูงอายุที่ถูกละเลยทอดทิ้ง (ครองเตียง)', fmt(P.length), `ชาย ${P.filter(p => p.Sex === 'ชาย').length} · หญิง ${P.filter(p => p.Sex === 'หญิง').length}`],
+    ['ผู้ถูกละเลยทอดทิ้ง (ครองเตียง)', fmt(P.length), `ชาย ${P.filter(p => p.Sex === 'ชาย').length} · หญิง ${P.filter(p => p.Sex === 'หญิง').length}`],
     ['ติดปัญหาทางสังคม (ไม่ใช่เหตุทางการแพทย์)', fmt(soc.length), `${P.length ? Math.round(soc.length / P.length * 100) : 0}% ของผู้ป่วยทั้งหมด`],
     ['รวมวันนอน (เตียง-วัน)', fmt(los), `เฉลี่ย ${avg} วัน/คน · นานสุด ${fmt(Math.max(0, ...P.map(p => num(p.LOSDays))))} วัน`],
     ['นอนนานเกิน 30 วัน', fmt(P.filter(p => num(p.LOSDays) > 30).length), 'คน']
@@ -159,6 +161,9 @@ function render() {
       <div class="t"><i style="width:${r.sc / mx * 100}%;background:var(--g)"></i><i style="width:${(r.total - r.sc) / mx * 100}%;background:var(--g-l)"></i></div>
       <span class="n">${fmt(r.total)}</span><span class="muted" style="font-size:13px">ส่งแล้ว ${r.nr}/${r.nh} รพ.</span></div>`).join('');
 
+  bars('group', count(P.map(p => ({ g: String(p.TargetGroup || '').replace(/อื่น ๆ: [^,]*/g, 'อื่น ๆ') })), 'g'));
+  const ab = [['ต่ำกว่า 18 ปี', 0, 17], ['18–39 ปี', 18, 39], ['40–59 ปี', 40, 59], ['60–69 ปี', 60, 69], ['70–79 ปี', 70, 79], ['80 ปีขึ้นไป', 80, 999]];
+  bars('ageg', ab.map(([k, a, b]) => [k, P.filter(p => p.Age !== '' && num(p.Age) >= a && num(p.Age) <= b).length]));
   bars('placement', count(P, 'Placement'));
   bars('reason', count(P, 'MainReason'));
   bars('family', count(P, 'FamilyStatus'));
