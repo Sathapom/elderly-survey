@@ -59,6 +59,7 @@
   <p>ผู้สำรวจ: คณะกรรมการพัฒนางานสังคมสงเคราะห์ในโรงพยาบาล สป.สธ.</p>
   <p id="upd">กำลังโหลด…</p></div>
   <div class="sp"></div>
+  <select id="af"><option value="">ทุกสังกัด</option></select>
   <select id="rg"><option value="">ทั้งประเทศ</option></select>
   <button id="csv">ดาวน์โหลด CSV รายคน</button>
   <button id="ref">รีเฟรช</button>
@@ -98,7 +99,7 @@
 <script src="config.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-let D = null, tab = 'all', sortKey = 'pt', sortDir = -1;
+let AFF = {}, D = null, tab = 'all', sortKey = 'pt', sortDir = -1;
 const num = x => Number(x) || 0;
 const fmt = x => num(x).toLocaleString('th-TH');
 
@@ -109,8 +110,16 @@ async function load() {
     D = await r.json();
     if (!D.ok) throw new Error(D.error);
     $('err').textContent = '';
+    // สังกัด: ประเภทที่มีคำว่า "กรม" ในวงเล็บ = กรมนั้น, ที่เหลือ = สป.สธ.
+    D.hospitals.forEach(h => { const m = String(h.level).match(/\(([^)]*กรม[^)]*)\)/); h.aff = m ? m[1] : 'สป.สธ.'; });
+    AFF = Object.fromEntries(D.hospitals.map(h => [String(h.code), h.aff]));
+    const affs = [...new Set(D.hospitals.map(h => h.aff))].sort((a, b) => a === 'สป.สธ.' ? -1 : b === 'สป.สธ.' ? 1 : a.localeCompare(b, 'th'));
+    const cur = $('af').value;
+    $('af').innerHTML = '<option value="">ทุกสังกัด</option>' + affs.map(a => `<option value="${a}">${a}</option>`).join('');
+    if (affs.length > 2) $('af').insertAdjacentHTML('beforeend', '<option value="!สป.สธ.">นอก สป.สธ. ทั้งหมด</option>');
+    $('af').value = cur;
     if ($('rg').options.length === 1)
-      [...new Set(D.hospitals.map(h => h.region))].sort((a,b) => a - b).forEach(x => $('rg').insertAdjacentHTML('beforeend', `<option value="${x}">เขตสุขภาพที่ ${x}</option>`));
+      [...new Set(D.hospitals.map(h => h.region))].sort((a,b) => a - b).forEach(x => $('rg').insertAdjacentHTML('beforeend', `<option value="${x}">${x == '13' ? 'กรุงเทพมหานคร (เขต 13)' : 'เขตสุขภาพที่ ' + x}</option>`));
     render();
     $('upd').textContent = 'ข้อมูล ณ ' + D.updated + ' น. · รีเฟรชอัตโนมัติทุก 2 นาที';
   } catch (e) { $('err').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + e.message; }
@@ -131,10 +140,11 @@ function count(list, key, order) {
 }
 
 function render() {
-  const rg = $('rg').value;
-  const H = D.hospitals.filter(h => !rg || String(h.region) === rg);
-  const R = D.responses.filter(r => !rg || String(r.Region) === rg);
-  const P = D.patients.filter(p => !rg || String(p.Region) === rg);
+  const rg = $('rg').value, af = $('af').value;
+  const okAff = code => !af || (af === '!สป.สธ.' ? AFF[String(code)] !== 'สป.สธ.' : AFF[String(code)] === af);
+  const H = D.hospitals.filter(h => (!rg || String(h.region) === rg) && okAff(h.code));
+  const R = D.responses.filter(r => (!rg || String(r.Region) === rg) && okAff(r.Code));
+  const P = D.patients.filter(p => (!rg || String(p.Region) === rg) && okAff(p.HospCode));
   const MED = 'ยังต้องรักษาทางการแพทย์';
   const isSoc = p => p.MainReason !== MED;
   const soc = P.filter(isSoc);
@@ -150,15 +160,15 @@ function render() {
     ['นอนนานเกิน 30 วัน', fmt(P.filter(p => num(p.LOSDays) > 30).length), 'คน']
   ].map(([l, v, s]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
 
-  const regs = [...new Set(D.hospitals.map(h => String(h.region)))].filter(x => !rg || x === rg).sort((a, b) => a - b);
+  const regs = [...new Set(H.map(h => String(h.region)))].sort((a, b) => a - b);
   const rows = regs.map(x => {
     const pp = P.filter(p => String(p.Region) === x), sc = pp.filter(isSoc).length;
-    const nh = D.hospitals.filter(h => String(h.region) === x).length, nr = D.responses.filter(r => String(r.Region) === x).length;
+    const nh = H.filter(h => String(h.region) === x).length, nr = R.filter(r => String(r.Region) === x).length;
     return { x, total: pp.length, sc, nh, nr };
   });
   const mx = Math.max(1, ...rows.map(r => r.total));
   $('byRegion').innerHTML = rows.map(r => `<div class="bar" style="grid-template-columns:110px 1fr 54px 120px">
-      <span>เขต ${r.x}</span>
+      <span>${r.x == '13' ? 'กทม.' : 'เขต ' + r.x}</span>
       <div class="t"><i style="width:${r.sc / mx * 100}%;background:var(--g)"></i><i style="width:${(r.total - r.sc) / mx * 100}%;background:var(--g-l)"></i></div>
       <span class="n">${fmt(r.total)}</span><span class="muted" style="font-size:13px">ส่งแล้ว ${r.nr}/${r.nh} รพ.</span></div>`).join('');
 
@@ -199,12 +209,13 @@ function table(H, R, P) {
 
 $('tabs').onclick = e => { if (e.target.dataset.v) { tab = e.target.dataset.v; [...$('tabs').children].forEach(b => b.classList.toggle('on', b === e.target)); render(); } };
 $('rg').onchange = render;
+$('af').onchange = render;
 $('ref').onclick = load;
 $('csv').onclick = () => {
   if (!D || !D.patients.length) return alert('ยังไม่มีข้อมูลรายคน');
   const keys = Object.keys(D.patients[0]);
   const esc = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const csv = '﻿' + [keys.join(','), ...D.patients.filter(p => !$('rg').value || String(p.Region) === $('rg').value).map(p => keys.map(k => esc(p[k])).join(','))].join('\n');
+  const csv = '﻿' + [keys.join(','), ...D.patients.filter(p => (!$('rg').value || String(p.Region) === $('rg').value) && (!$('af').value || ($('af').value === '!สป.สธ.' ? AFF[String(p.HospCode)] !== 'สป.สธ.' : AFF[String(p.HospCode)] === $('af').value))).map(p => keys.map(k => esc(p[k])).join(','))].join('\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'patients.csv'; a.click();
 };
 load(); setInterval(load, 120000);
