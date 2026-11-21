@@ -51,8 +51,7 @@
 <header><div class="hd">
   <img src="logo.png" alt="ตรากระทรวงสาธารณสุข">
   <div><h1>แบบสำรวจผู้ถูกละเลยทอดทิ้ง<br>ซึ่งกำลังนอนรักษาตัวในโรงพยาบาล</h1>
-  <p>ผู้สำรวจ: คณะกรรมการพัฒนางานสังคมสงเคราะห์ในโรงพยาบาล สป.สธ.</p>
-  <p>ข้อมูลด่วน · โปรดส่งภายในวันที่ 20 พฤศจิกายน 2569</p></div>
+  <p>ผู้สำรวจ: คณะกรรมการพัฒนางานสังคมสงเคราะห์ในโรงพยาบาล สป.สธ.</p></div>
 </div></header>
 
 <main>
@@ -168,7 +167,7 @@ async function loadHosp() {
     if (!j.ok) throw new Error(j.error);
     HOSP = j.hospitals;
     const regions = [...new Set(HOSP.map(h => h.region))].sort((a,b) => a - b);
-    regions.forEach(x => $('region').insertAdjacentHTML('beforeend', `<option value="${x}">เขตสุขภาพที่ ${x}</option>`));
+    regions.forEach(x => $('region').insertAdjacentHTML('beforeend', `<option value="${x}">${x == '13' ? 'กรุงเทพมหานคร (เขต 13)' : 'เขตสุขภาพที่ ' + x}</option>`));
     fillHosp();
     $('loading').classList.add('hidden'); $('f').classList.remove('hidden');
     if (!HOSP.length) { $('loading').textContent = 'ทุกโรงพยาบาลส่งข้อมูลครบแล้ว ขอบคุณครับ'; $('loading').classList.remove('hidden'); $('f').classList.add('hidden'); }
@@ -180,7 +179,7 @@ function fillHosp() {
   const rg = $('region').value, sel = $('hosp'), cur = sel.value;
   sel.innerHTML = '<option value="">— เลือกโรงพยาบาล —</option>';
   HOSP.filter(h => !rg || h.region === rg).sort((a,b) => a.region - b.region || a.name.localeCompare(b.name, 'th'))
-    .forEach(h => sel.insertAdjacentHTML('beforeend', `<option value="${h.code}">${h.name} (${h.code}) · เขต ${h.region}</option>`));
+    .forEach(h => sel.insertAdjacentHTML('beforeend', `<option value="${h.code}">${h.name} (${h.code}) · ${h.region == '13' ? 'กทม.' : 'เขต ' + h.region}</option>`));
   sel.value = cur;
 }
 $('region').onchange = fillHosp;
